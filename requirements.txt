@@ -1,0 +1,11 @@
+fastapi==0.110.0
+librosa==0.10.1
+matplotlib==3.8.3
+moviepy==1.0.3
+python-multipart==0.0.5 
+numpy==1.26.4
+opencv_python==4.9.0.80
+pandas==2.2.1
+Pillow==9.0.1
+uvicorn==0.15.0
+

@@ -5,6 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List , Annotated
 import multipart
 import os
+import asyncio
+from threading import Thread
 app = FastAPI()
 
 app.add_middleware(
@@ -24,18 +26,24 @@ async def create_upload_files(file: List[UploadFile] = File(...),  uid: str = He
         contents = await files.read()
         if files.filename.endswith(".mp4"):
             if not os.path.exists(f"./incoming_videos/{uid}"):
+                if not os.path.exists(f"./incoming_videos"):
+                    os.mkdir(f"./incoming_videos")
                 os.mkdir(f"./incoming_videos/{uid}")
             f = open(f"./incoming_videos/{uid}/{files.filename}", "wb+") # create a file with the name of the uploaded file
             f.write(contents)
             f.close()
         if files.filename.endswith(".mp3"):
             if not os.path.exists(f"./incoming_audio/{uid}"):
+                if not os.path.exists(f"./incoming_audio"):
+                    os.mkdir(f"./incoming_audio")
                 os.mkdir(f"./incoming_audio/{uid}")
             f = open(f"./incoming_audio/{uid}/{files.filename}", "wb+")
             f.write(contents)
             f.close()
         if files.filename.endswith(".jpg") or files.filename.endswith(".jpeg") or files.filename.endswith(".png"):
             if not os.path.exists(f"./incoming_images/{uid}"):
+                if not os.path.exists(f"./incoming_images"):
+                    os.mkdir(f"./incoming_images")
                 os.mkdir(f"./incoming_images/{uid}")
             f = open(f"./incoming_images/{uid}/{files.filename}", "wb+")
             f.write(contents)
@@ -52,29 +60,34 @@ async def create_upload_files(file: List[UploadFile] = File(...),  uid: str = He
 @app.get("/get-video")
 async def get_video(uid: str = Header(...)):
     # Specify the path to the video file
+    def render_v(uid):
+        op = render_video(uid)
+        return op
     if not os.path.exists(f"./output/{uid}"):
+        if not os.path.exists(f"./output"):
+            os.mkdir(f"./output")
         os.mkdir(f"./output/{uid}")
-    op = render_video(uid)
+    t = Thread(target=render_v, args=(uid,))
+    t.start()
+ 
+    #wait for the thread to finish
+    t.join()
+    op = os.path.exists(f"./output/{uid}/edit.mp4")
     if op:
         return FileResponse(f"./output/{uid}/edit.mp4" , media_type="video/mp4")
     else:
         return {"message": "Error in rendering video"}
 
-@app.get("/")
-async def main():
-    content = """
-<body>
-<form action="/files/" enctype="multipart/form-data" method="post">
-<input name="files" type="file" multiple>
-<input type="submit">
-</form>
-<form action="/uploadfiles/" enctype="multipart/form-data" method="post">
-<input name="files" type="file" multiple>
-<input type="submit">
-</form>
-</body>
-    """
-    return HTMLResponse(content=content)
+@app.delete("/delete-files")
+async def delete_files(uid: str = Header(...)):
+    try:
+        os.system(f"rm -rf ./incoming_videos/{uid}")
+        os.system(f"rm -rf ./incoming_audio/{uid}")
+        os.system(f"rm -rf ./incoming_images/{uid}")
+        os.system(f"rm -rf ./output/{uid}")
+        return {"message": "Files deleted successfully"}
+    except:
+        return {"message": "Error in deleting files"}
 
 # Path: server.py
 # Add code to run FastAPi App
@@ -82,3 +95,6 @@ async def main():
 #     import uvicorn
 #     uvicorn.run(app, host="
 #
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
