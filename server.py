@@ -58,21 +58,22 @@ async def create_upload_files(file: List[UploadFile] = File(...),  uid: str = He
     # return Response(content="File uploaded")
 
 @app.get("/get-video")
-async def get_video(uid: str = Header(...)):
+def get_video(uid: str = Header(...)):
     # Specify the path to the video file
-    def render_v(uid):
-        op = render_video(uid)
-        return op
+    # def render_v(uid):
+    
     if not os.path.exists(f"./output/{uid}"):
         if not os.path.exists(f"./output"):
             os.mkdir(f"./output")
         os.mkdir(f"./output/{uid}")
-    t = Thread(target=render_v, args=(uid,))
-    t.start()
+    op = render_video(uid)
+        # return op
+    # t = Thread(target=render_v, args=(uid,))
+    # t.start()
  
-    #wait for the thread to finish
-    t.join()
-    op = os.path.exists(f"./output/{uid}/edit.mp4")
+    # #wait for the thread to finish
+    # t.join()
+    # op = os.path.exists(f"./output/{uid}/edit.mp4")
     if op:
         return FileResponse(f"./output/{uid}/edit.mp4" , media_type="video/mp4")
     else:

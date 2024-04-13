@@ -83,9 +83,13 @@ def render_video(uid: str):
     import pandas as pd
     import random
     import moviepy.video.fx.all as vfx
-    images = [img for img in os.listdir(f"./incoming_images/{uid}/") if img.endswith(".png") or (img.endswith(".jpg"))]
-    videos = [vid for vid in os.listdir(f"./incoming_videos/{uid}/") if vid.endswith(".mp4") or vid.endswith(".avi")]
-    music = [mus for mus in os.listdir(f"./incoming_audio/{uid}/") if mus.endswith(".mp3") or mus.endswith(".wav")][0]
+    images , videos , music = [] , [] , ""
+    if os.path.exists(f"./incoming_images/{uid}/"):
+        images = [img for img in os.listdir(f"./incoming_images/{uid}/") if img.endswith(".png") or (img.endswith(".jpg"))]
+    if os.path.exists(f"./incoming_videos/{uid}/"):
+        videos = [vid for vid in os.listdir(f"./incoming_videos/{uid}/") if vid.endswith(".mp4") or vid.endswith(".avi")]
+    if os.path.exists(f"./incoming_audio/{uid}/"):
+        music = [mus for mus in os.listdir(f"./incoming_audio/{uid}/") if mus.endswith(".mp3") or mus.endswith(".wav")][0]
     y , s  = librosa.load(os.path.join(f"./incoming_audio/{uid}/", music))
 
     S, phase = librosa.magphase(librosa.stft(y))
