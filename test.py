@@ -7,7 +7,7 @@ import numpy as np
 # Loading the images
 images = [img for img in os.listdir("./images/") if img.endswith(".png") or img.endswith(".jpg")]
 videos = [vid for vid in os.listdir("./videos/") if vid.endswith(".mp4") or vid.endswith(".avi")]
-
+#test commit
 # Loading the audio
 y, sr = librosa.load('./audio/beats.mp3')
 S, phase = librosa.magphase(librosa.stft(y))
